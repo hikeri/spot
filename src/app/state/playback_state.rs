@@ -6,6 +6,7 @@ use crate::app::state::{AppAction, AppEvent, UpdatableState};
 
 #[derive(Clone, Debug)]
 pub enum PlaylistSource {
+    SavedTracks,
     Playlist(String),
     Album(String),
 }
@@ -15,6 +16,7 @@ impl PartialEq for PlaylistSource {
         match (self, other) {
             (&Self::Playlist(ref a), &Self::Playlist(ref b)) => a == b,
             (&Self::Album(ref a), &Self::Album(ref b)) => a == b,
+            (&Self::SavedTracks, &Self::SavedTracks) => true,
             _ => false,
         }
     }

@@ -174,6 +174,14 @@ pub struct Batch {
 }
 
 impl Batch {
+    pub fn first_of_size(batch_size: usize) -> Self {
+        Batch {
+            offset: 0,
+            batch_size,
+            total: usize::MAX,
+        }
+    }
+
     pub fn next(self) -> Option<Self> {
         let Self {
             offset,

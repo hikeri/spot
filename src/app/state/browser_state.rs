@@ -27,6 +27,7 @@ pub enum BrowserAction {
     UnsaveAlbum(String),
     SetUserDetails(UserDescription),
     AppendUserPlaylists(Vec<PlaylistDescription>),
+    AppendSavedTracks(SongBatch),
 }
 
 impl From<BrowserAction> for AppAction {
@@ -64,6 +65,7 @@ pub enum BrowserEvent {
     AlbumSaved(String),
     AlbumUnsaved(String),
     UserDetailsUpdated(String),
+    SavedTracksAppended(usize),
 }
 
 pub enum BrowserScreen {
