@@ -5,7 +5,7 @@ use crate::{
 use gio::prelude::SettingsExt;
 use librespot::playback::config::Bitrate;
 
-pub const SETTINGS: &str = "dev.alextren.Spot";
+const SETTINGS: &str = "dev.alextren.Spot";
 
 #[derive(Clone, Default)]
 pub struct WindowGeometry {
@@ -14,9 +14,13 @@ pub struct WindowGeometry {
     pub is_maximized: bool,
 }
 
+pub fn get_settings() -> gio::Settings {
+    gio::Settings::new(SETTINGS)
+}
+
 impl WindowGeometry {
     pub fn new_from_gsettings() -> Self {
-        let settings = gio::Settings::new(SETTINGS);
+        let settings = get_settings();
         Self {
             width: settings.int("window-width"),
             height: settings.int("window-height"),
@@ -25,7 +29,7 @@ impl WindowGeometry {
     }
 
     pub fn save(&self) -> Option<()> {
-        let settings = gio::Settings::new(SETTINGS);
+        let settings = get_settings();
         settings.delay();
         settings.set_int("window-width", self.width).ok()?;
         settings.set_int("window-height", self.height).ok()?;
@@ -39,7 +43,7 @@ impl WindowGeometry {
 
 impl SpotifyPlayerSettings {
     pub fn new_from_gsettings() -> Option<Self> {
-        let settings = gio::Settings::new(SETTINGS);
+        let settings = get_settings();
         let bitrate = match settings.enum_("player-bitrate") {
             0 => Some(Bitrate::Bitrate96),
             1 => Some(Bitrate::Bitrate160),
@@ -66,10 +70,13 @@ impl SpotifyPlayerSettings {
             x => Some(x as u16),
         };
 
+        let volume = settings.double("volume");
+
         Some(Self {
             bitrate,
             backend,
             ap_port,
+            volume,
         })
     }
 }
@@ -82,7 +89,7 @@ pub struct SpotSettings {
 
 impl SpotSettings {
     pub fn new_from_gsettings() -> Option<Self> {
-        let settings = gio::Settings::new(SETTINGS);
+        let settings = get_settings();
         let prefers_dark_theme = settings.boolean("prefers-dark-theme");
         Some(Self {
             prefers_dark_theme,

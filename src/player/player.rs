@@ -1,6 +1,7 @@
 use futures::channel::mpsc::UnboundedReceiver;
 use futures::stream::StreamExt;
 
+use gdk_pixbuf::prelude::SettingsExt;
 use librespot::core::authentication::Credentials;
 use librespot::core::config::SessionConfig;
 use librespot::core::keymaster;
@@ -60,6 +61,7 @@ pub enum AudioBackend {
 #[derive(Clone)]
 pub struct SpotifyPlayerSettings {
     pub bitrate: Bitrate,
+    pub volume : f64,
     pub backend: AudioBackend,
     pub ap_port: Option<u16>,
 }
@@ -70,6 +72,7 @@ impl Default for SpotifyPlayerSettings {
             bitrate: Bitrate::Bitrate160,
             backend: AudioBackend::PulseAudio,
             ap_port: None,
+            volume : 1.0,
         }
     }
 }
@@ -100,6 +103,7 @@ impl SpotifyPlayer {
             Command::PlayerSetVolume(volume) => {
                 if let Some(mixer) = self.mixer.borrow_mut().as_mut() {
                     mixer.set_volume((VolumeCtrl::MAX_VOLUME as f64 * volume) as u16);
+                    crate::settings::get_settings().set_double("volume", volume);
                 }
                 Ok(())
             }

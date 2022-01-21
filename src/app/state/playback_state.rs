@@ -5,7 +5,7 @@ use gdk_pixbuf::prelude::SettingsExt;
 
 use crate::app::state::{AppAction, AppEvent, UpdatableState};
 use crate::app::{BatchQuery, LazyRandomIndex, SongsSource};
-use crate::settings::SETTINGS;
+use crate::settings;
 
 #[derive(Debug)]
 pub struct PlaybackState {
@@ -36,6 +36,11 @@ impl PlaybackState {
 
     pub fn repeat_mode(&self) -> RepeatMode {
         self.repeat
+    }
+
+    pub fn set_repeat(&mut self, repeat: RepeatMode) {
+        self.repeat = repeat;
+        settings::get_settings().set_enum(RepeatMode::KEY, repeat.to_gsettings_enum());
     }
 
     pub fn next_query(&self) -> Option<BatchQuery> {
@@ -204,18 +209,18 @@ impl PlaybackState {
     }
 
     fn toggle_shuffle(&mut self) {
-        self.is_shuffled = !self.is_shuffled;
+        self.set_shuffle(!self.is_shuffled);
+    }
+
+    fn set_shuffle(&mut self, is_shuffled: bool) {
         let old = self.position.replace(0).unwrap_or(0);
         self.index.reset_picking_first(old);
+        settings::get_settings().set_boolean("shuffle", is_shuffled);
     }
+
     pub fn new_from_gsettings() -> Option<Self> {
-        let settings = gio::Settings::new(SETTINGS);
-        let repeat = match settings.enum_("repeat") {
-            0 => Some(RepeatMode::None),
-            1 => Some(RepeatMode::Song),
-            2 => Some(RepeatMode::Playlist),
-            _ => None,
-        }?;
+        let settings = settings::get_settings();
+        let repeat =  RepeatMode::from_gsettings_enum(settings.enum_(RepeatMode::KEY))?;
         let shuffle = settings.boolean("shuffle");
         info!("Repeat mode: {:?}", repeat);
         info!("Shuffle: {}", shuffle);
@@ -290,6 +295,26 @@ pub enum RepeatMode {
     None,
 }
 
+impl RepeatMode {
+    pub const KEY: &'static str = "repeat";
+    fn to_gsettings_enum(&self) -> i32 {
+        match *self {
+            Self::Song => 1,
+            Self::Playlist => 2,
+            Self::None => 0,
+        }
+    }
+    fn from_gsettings_enum(value: i32) -> Option<Self> {
+        match value {
+            1 => Some(Self::Song),
+            2 => Some(Self::Playlist),
+            0 => Some(Self::None),
+            _ => None
+        }
+    }
+
+}
+
 impl From<PlaybackEvent> for AppEvent {
     fn from(playback_event: PlaybackEvent) -> Self {
         Self::PlaybackEvent(playback_event)
@@ -332,15 +357,15 @@ impl UpdatableState for PlaybackState {
                 }
             }
             PlaybackAction::ToggleRepeat => {
-                self.repeat = match self.repeat {
+                self.set_repeat(match self.repeat {
                     RepeatMode::Song => RepeatMode::None,
                     RepeatMode::Playlist => RepeatMode::Song,
                     RepeatMode::None => RepeatMode::Playlist,
-                };
+                });
                 vec![PlaybackEvent::RepeatModeChanged(self.repeat)]
             }
             PlaybackAction::SetRepeatMode(mode) => {
-                self.repeat = mode;
+                self.set_repeat(mode);
                 vec![PlaybackEvent::RepeatModeChanged(self.repeat)]
             }
             PlaybackAction::ToggleShuffle => {
@@ -348,7 +373,7 @@ impl UpdatableState for PlaybackState {
                 vec![PlaybackEvent::ShuffleChanged]
             }
             PlaybackAction::SetShuffle(shuffle) => {
-                self.is_shuffled = shuffle;
+                self.set_shuffle(shuffle);
                 vec![PlaybackEvent::ShuffleChanged]
             }
             PlaybackAction::Next => {

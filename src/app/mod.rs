@@ -48,9 +48,12 @@ impl App {
     ) -> Self {
         let state = AppState::new();
         // Read from AppState and broadcast the initial state.
+        // We do this until there is a better way to notify the widgets/models
+        // about initial state
         {
             sender.unbounded_send(AppAction::PlaybackAction(PlaybackAction::SetRepeatMode(state.playback.repeat_mode()))).expect("Failed to broadcast app state");
             sender.unbounded_send(AppAction::PlaybackAction(PlaybackAction::SetShuffle(state.playback.is_shuffled()))).expect("Failed to broadcast app state");
+            sender.unbounded_send(AppAction::PlaybackAction(PlaybackAction::SetVolume(settings.player_settings.volume))).expect("Failed to broadcast app state");
         }
         let spotify_client = Arc::new(CachedSpotifyClient::new());
         let model = Rc::new(AppModel::new(state, spotify_client));
