@@ -1,5 +1,6 @@
 use crate::api::CachedSpotifyClient;
 use crate::app::components::sidebar_listbox::{build_sidebar_listbox, SideBarItem};
+use crate::app::state::PlaybackAction;
 use crate::glib::StaticType;
 use crate::settings::SpotSettings;
 use futures::channel::mpsc::UnboundedSender;
@@ -46,6 +47,11 @@ impl App {
         worker: Worker,
     ) -> Self {
         let state = AppState::new();
+        // Read from AppState and broadcast the initial state.
+        {
+            sender.unbounded_send(AppAction::PlaybackAction(PlaybackAction::SetRepeatMode(state.playback.repeat_mode()))).expect("Failed to broadcast app state");
+            sender.unbounded_send(AppAction::PlaybackAction(PlaybackAction::SetShuffle(state.playback.is_shuffled()))).expect("Failed to broadcast app state");
+        }
         let spotify_client = Arc::new(CachedSpotifyClient::new());
         let model = Rc::new(AppModel::new(state, spotify_client));
 

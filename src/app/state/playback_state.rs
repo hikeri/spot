@@ -1,8 +1,11 @@
 use std::borrow::Cow;
 
 use crate::app::models::{SongBatch, SongDescription, SongListModel, SongListModelPending};
+use gdk_pixbuf::prelude::SettingsExt;
+
 use crate::app::state::{AppAction, AppEvent, UpdatableState};
 use crate::app::{BatchQuery, LazyRandomIndex, SongsSource};
+use crate::settings::SETTINGS;
 
 #[derive(Debug)]
 pub struct PlaybackState {
@@ -20,6 +23,9 @@ impl PlaybackState {
         &self.songs
     }
 
+    pub fn new() -> Self {
+        Self::new_from_gsettings().unwrap_or_default()
+    }
     pub fn is_playing(&self) -> bool {
         self.is_playing && self.position.is_some()
     }
@@ -202,6 +208,23 @@ impl PlaybackState {
         let old = self.position.replace(0).unwrap_or(0);
         self.index.reset_picking_first(old);
     }
+    pub fn new_from_gsettings() -> Option<Self> {
+        let settings = gio::Settings::new(SETTINGS);
+        let repeat = match settings.enum_("repeat") {
+            0 => Some(RepeatMode::None),
+            1 => Some(RepeatMode::Song),
+            2 => Some(RepeatMode::Playlist),
+            _ => None,
+        }?;
+        let shuffle = settings.boolean("shuffle");
+        info!("Repeat mode: {:?}", repeat);
+        info!("Shuffle: {}", shuffle);
+        Some(Self {
+            repeat,
+            is_shuffled: shuffle,
+            ..Default::default()
+        })
+    }
 }
 
 impl Default for PlaybackState {
@@ -225,6 +248,7 @@ pub enum PlaybackAction {
     Pause,
     Stop,
     SetRepeatMode(RepeatMode),
+    SetShuffle(bool),
     ToggleRepeat,
     ToggleShuffle,
     Seek(u32),
@@ -321,6 +345,10 @@ impl UpdatableState for PlaybackState {
             }
             PlaybackAction::ToggleShuffle => {
                 self.toggle_shuffle();
+                vec![PlaybackEvent::ShuffleChanged]
+            }
+            PlaybackAction::SetShuffle(shuffle) => {
+                self.is_shuffled = shuffle;
                 vec![PlaybackEvent::ShuffleChanged]
             }
             PlaybackAction::Next => {

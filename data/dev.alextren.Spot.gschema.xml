@@ -9,6 +9,11 @@
     <value value="1" nick="160"/>
     <value value="2" nick="320"/>
   </enum>
+  <enum id="dev.alextren.Spot.RepeatMode">
+    <value value="0" nick="none"/>
+    <value value="1" nick="song"/>
+    <value value="2" nick="playlist"/>
+  </enum>
   <schema id="dev.alextren.Spot" path="/dev/alextren/Spot/">
     <key name='prefers-dark-theme' type='b'>
       <default>true</default>
@@ -41,6 +46,14 @@
     <key name='ap-port' type='u'>
       <default>0</default>
       <summary>Port to communicate with Spotify's server (access point). Setting to 0 (default) allows Spot to use servers running on any port.</summary>
+    </key>
+    <key name='repeat' enum='dev.alextren.Spot.RepeatMode'>
+      <default>'none'</default>
+      <summary>The repeat mode for songs. Setting to 0 (default) disables repeat so the player will stop when a playlist ends.</summary>
+    </key>
+    <key name='shuffle' type='b'>
+      <default>false</default>
+      <summary>Whether playlists should be played in order or randomly.</summary>
     </key>
   </schema>
 </schemalist>

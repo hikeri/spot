@@ -104,7 +104,7 @@ impl AppState {
     pub fn new() -> Self {
         Self {
             started: false,
-            playback: Default::default(),
+            playback: PlaybackState::new(),
             browser: BrowserState::new(),
             selection: Default::default(),
             logged_user: Default::default(),

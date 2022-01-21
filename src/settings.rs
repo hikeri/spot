@@ -1,8 +1,11 @@
-use crate::player::{AudioBackend, SpotifyPlayerSettings};
+use crate::{
+    app::state::{PlaybackState, RepeatMode},
+    player::{AudioBackend, SpotifyPlayerSettings},
+};
 use gio::prelude::SettingsExt;
 use librespot::playback::config::Bitrate;
 
-const SETTINGS: &str = "dev.alextren.Spot";
+pub const SETTINGS: &str = "dev.alextren.Spot";
 
 #[derive(Clone, Default)]
 pub struct WindowGeometry {
