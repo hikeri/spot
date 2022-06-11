@@ -6,7 +6,6 @@
     <property name="halign">center</property>
     <property name="hexpand">1</property>
     <property name="spacing">8</property>
-    <property name="homogeneous">1</property>
     <child>
       <object class="GtkToggleButton" id="shuffle">
         <property name="receives-default">1</property>
@@ -58,6 +57,22 @@
         <property name="has-frame">0</property>
         <property name="icon-name">media-playlist-consecutive-symbolic</property>
         <property name="tooltip-text" translatable="yes">Repeat</property>
+      </object>
+    </child>
+    <!-- Volume slider -->
+    <child>
+      <object class="GtkScale" id="volume_slider">
+        <property name="width-request">100</property>
+        <property name="halign">fill</property>
+        <property name="tooltip-text" translatable="yes">Repeat</property>
+        <property name="adjustment">
+          <object class="GtkAdjustment">
+            <property name="lower">0.0</property>
+            <property name="step-increment">0.1</property>
+            <property name="value">0.7</property>
+            <property name="upper">1.0</property>
+          </object>
+        </property>
       </object>
     </child>
   </template>
