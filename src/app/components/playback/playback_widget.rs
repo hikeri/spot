@@ -97,7 +97,7 @@ impl PlaybackWidget {
         let weak_self = self.downgrade();
         worker.send_local_task(async move {
             let loader = ImageLoader::new();
-            let result = loader.load_remote(&url, "jpg", 64, 64).await;
+            let result = loader.load_remote(&url, "jpg", 72, 72).await;
             if let (Some(ref _self), Some(ref result)) = (weak_self.upgrade(), result) {
                 _self.set_artwork(result);
             }

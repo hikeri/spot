@@ -26,7 +26,6 @@
         <child>
           <object class="GtkGrid">
             <property name="hexpand">1</property>
-            <property name="column-homogeneous">1</property>
             <!-- playback info -->
             <child>
               <object class="PlaybackInfoWidget" id="now_playing">
@@ -60,7 +59,6 @@
                 <property name="margin-end">4</property>
                 <layout>
                   <property name="column-span">1</property>
-                  <property name="row-span">2</property>
                   <property name="column">2</property>
                   <property name="row">0</property>
                 </layout>
