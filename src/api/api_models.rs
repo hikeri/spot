@@ -1,7 +1,6 @@
 use form_urlencoded::Serializer;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use serde_json::Number;
 use std::{
     collections::HashSet,
     convert::{Into, TryFrom, TryInto},
